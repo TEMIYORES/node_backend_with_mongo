@@ -1,99 +1,68 @@
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
-const fsPromises = require('fs').promises;
+require("dotenv").config();
 
-const logEvents = require('./logEvents');
-const EventEmitter = require('events');
-class Emitter extends EventEmitter { };
-// initialize object 
-const myEmitter = new Emitter();
-myEmitter.on('log', (msg, fileName) => logEvents(msg, fileName));
-const PORT = process.env.PORT || 3500;
+const express = require("express");
+const cors = require("cors");
+const app = express();
+const path = require("path");
+const corsOptions = require("./config/corsOptions");
+const { logger } = require("./middleware/logEvents");
+const errorHandler = require("./middleware/errorHandler");
+const cookieParser = require("cookie-parser");
+const verifyJwt = require("./middleware/verifyJwt");
+const credentials = require("./middleware/credentials");
+const connectDB = require("./config/mongoose");
+const mongoose = require("mongoose");
+// connect to mongoDB
+connectDB();
+// custom logger
+app.use(logger);
 
-const serveFile = async (filePath, contentType, response) => {
-    try {
-        const rawData = await fsPromises.readFile(
-            filePath,
-            !contentType.includes('image') ? 'utf8' : ''
-        );
-        const data = contentType === 'application/json'
-            ? JSON.parse(rawData) : rawData;
-        response.writeHead(
-            filePath.includes('404.html') ? 404 : 200,
-            { 'Content-Type': contentType }
-        );
-        response.end(
-            contentType === 'application/json' ? JSON.stringify(data) : data
-        );
-    } catch (err) {
-        console.log(err);
-        myEmitter.emit('log', `${err.name}: ${err.message}`, 'errLog.txt');
-        response.statusCode = 500;
-        response.end();
-    }
-}
+// handles option credentials check - before CORS!
+// and fetch cookie credentials requirement
+app.use(credentials);
+// Cross Origin Resource Sharing
 
-const server = http.createServer((req, res) => {
-    console.log(req.url, req.method);
-    myEmitter.emit('log', `${req.url}\t${req.method}`, 'reqLog.txt');
+app.use(cors(corsOptions));
+// creating middlewares -inbuilt middleware, -custom middleware and third party middleware
+// built-in middleware to handle urlencoded form data in other words form data.
+app.use(express.urlencoded({ extended: false }));
 
-    const extension = path.extname(req.url);
+//built-in middleware for json
+app.use(express.json());
 
-    let contentType;
+// middle-ware for cookies
+app.use(cookieParser());
+//built-in middleware to serve static files
+app.use("/", express.static(path.join(__dirname, "public")));
 
-    switch (extension) {
-        case '.css':
-            contentType = 'text/css';
-            break;
-        case '.js':
-            contentType = 'text/javascript';
-            break;
-        case '.json':
-            contentType = 'application/json';
-            break;
-        case '.jpg':
-            contentType = 'image/jpeg';
-            break;
-        case '.png':
-            contentType = 'image/png';
-            break;
-        case '.txt':
-            contentType = 'text/plain';
-            break;
-        default:
-            contentType = 'text/html';
-    }
+//router handler
+app.use("/", require("./routes/root"));
+app.use("/register", require("./routes/register"));
+app.use("/auth", require("./routes/auth"));
+app.use("/refresh", require("./routes/refresh"));
+app.use("/logout", require("./routes/logout"));
+app.use(verifyJwt);
+app.use("/employees", require("./routes/api/employees"));
 
-    let filePath =
-        contentType === 'text/html' && req.url === '/'
-            ? path.join(__dirname, 'views', 'index.html')
-            : contentType === 'text/html' && req.url.slice(-1) === '/'
-                ? path.join(__dirname, 'views', req.url, 'index.html')
-                : contentType === 'text/html'
-                    ? path.join(__dirname, 'views', req.url)
-                    : path.join(__dirname, req.url);
+// PORT number
+const PORT = process.env.PORT || 4000;
 
-    // makes .html extension not required in the browser
-    if (!extension && req.url.slice(-1) !== '/') filePath += '.html';
-
-    const fileExists = fs.existsSync(filePath);
-
-    if (fileExists) {
-        serveFile(filePath, contentType, res);
-    } else {
-        switch (path.parse(filePath).base) {
-            case 'old-page.html':
-                res.writeHead(301, { 'Location': '/new-page.html' });
-                res.end();
-                break;
-            case 'www-page.html':
-                res.writeHead(301, { 'Location': '/' });
-                res.end();
-                break;
-            default:
-                serveFile(path.join(__dirname, 'views', '404.html'), 'text/html', res);
-        }
-    }
+app.all("*", (req, res) => {
+  res.status(404);
+  if (req.accepts("html")) {
+    res.sendFile(path.join(__dirname, "views", "404.html"));
+  } else if (req.accepts("json")) {
+    res.json({ error: "404 Not Found" });
+  } else {
+    res.type("txt").send("404 Not Found");
+  }
 });
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.use(errorHandler);
+
+mongoose.connection.once("connected", () => {
+  console.log("MongoDB connected");
+  app.listen(PORT, () => {
+    console.log(`server is running on PORT ${PORT}`);
+  });
+});

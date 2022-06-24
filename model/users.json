@@ -1,0 +1,20 @@
+[
+  {
+    "username": "temi3",
+    "password": "$2b$10$ZU0ZEYCq6RIJh9vMPJ49R.4Yzo6hZjtcBwbNkrMxCC4S62p84bVFa",
+    "roles": { "user": 2001 },
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlbWkzIiwiaWF0IjoxNjU1NDg1OTQ1LCJleHAiOjE2NTU1NzIzNDV9.cVLARyvbiKPFnujP3qGe4pYW_zo1N6WwXy8utd_Hp7Y"
+  },
+  {
+    "username": "temi2",
+    "password": "$2b$10$5RSO9emdeEtpSsUc5eChm.w8Vax7us4wZCWhKAHQpWvA6u/USdvTm",
+    "roles": { "user": 2001, "Editor": 1984 },
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlbWkyIiwiaWF0IjoxNjU1NDg2MjEzLCJleHAiOjE2NTU1NzI2MTN9.m7DavCsO-b7mPQNbuxhDnMnXlZ3BBo2fA8qYeqX0kno"
+  },
+  {
+    "username": "temi",
+    "password": "$2b$10$tz1N9PZ00tv7lcRutrEdmeF5X1crV7dFFzQntCj3pD0bLGE5EhtLS",
+    "roles": { "user": 2001, "Editor": 1984, "Admin": 5150 },
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlbWkiLCJpYXQiOjE2NTU0ODYyNDgsImV4cCI6MTY1NTU3MjY0OH0.NkbZL4JjLFRw_T9_lArLmZz1MFEVSGcYXTpY1C12L0M"
+  }
+]

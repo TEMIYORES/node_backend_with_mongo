@@ -1,0 +1,5 @@
+2022-06-08	12:33:53	754c51d0-e035-4586-9a15-5ae69c7c108c	Error	Not allowed by CORS
+2022-06-08	12:50:21	0f5c7737-5bb9-410f-9639-467a38607468	Error	Not allowed by CORS
+2022-06-08	12:50:37	35fe5fcb-bd36-4109-96f1-2a9bbe9ea3e7	Error	Not allowed by CORS
+2022-06-12	13:15:40	cf0f999d-15a6-4ec5-981a-1d083fc83591	TypeError	res.sendstatus is not a function
+2022-06-12	13:15:49	b620f0ac-b3ab-463d-adb3-acf733fd09ce	TypeError	res.sendstatus is not a function
